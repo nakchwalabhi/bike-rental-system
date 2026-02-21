@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vendor Login | Dehradun Bike Rental</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4">
+
+  <div class="w-full max-w-md">
+
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+        Vendor Login
+      </h1>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Login to manage your vehicles and bookings
+      </p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+
+      <form id="vendorLoginForm" class="space-y-4 text-sm">
+
+        <!-- Email -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-300 mb-1 block">Email</label>
+          <input 
+            id="email"
+            type="email"
+            placeholder="vendor@example.com"
+            class="w-full rounded-xl border border-slate-300 dark:border-slate-700 
+                   bg-white text-slate-900 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-300 mb-1 block">Password</label>
+          <input 
+            id="password"
+            type="password"
+            placeholder="******"
+            class="w-full rounded-xl border border-slate-300 dark:border-slate-700 
+                   bg-white text-slate-900 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs"
+            required
+          />
+        </div>
+
+        <!-- Submit -->
+        <button 
+          type="submit"
+          class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-xl shadow-sm">
+          Login
+        </button>
+
+      </form>
+
+      <p class="text-center text-[11px] text-slate-500 dark:text-slate-400 mt-3">
+        Not registered?
+        <a href="vendor-register.html" class="text-blue-600 hover:underline">Register here</a>
+      </p>
+
+      <p class="text-center text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+        ← <a href="index.html" class="hover:underline">Back to homepage</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script type="module" src="./assets/js/vendor-login.js"></script>
+
+</body>
+</html>
