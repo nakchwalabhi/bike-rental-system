@@ -6,6 +6,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
     <groupId>com.dehradun</groupId>
     <artifactId>bike-rental-backend</artifactId>
     <version>1.0.0</version>
@@ -55,6 +62,26 @@
 
         <!-- DevTools (optional, remove if deploying to prod) -->
 
+
+        <!-- BCrypt password hashing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!-- H2 in-memory DB for demo -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Razorpay Java SDK -->
+        <dependency>
+            <groupId>com.razorpay</groupId>
+            <artifactId>razorpay-java</artifactId>
+            <version>1.4.5</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
