@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -24,7 +24,7 @@ function AuthRoute({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
         <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
@@ -34,6 +34,6 @@ export default function App() {
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/vendor-register" element={<VendorRegister />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }

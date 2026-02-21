@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,12 @@ public class BookingService {
         booking.setHalfAmount(totalAmount != null ? totalAmount / 2 : 0);
         booking.setPaymentStatus("PENDING");
 
-        DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        // Accept both "2024-01-15T10:30" (datetime-local HTML input, no seconds)
+        // and "2024-01-15T10:30:00" (ISO with seconds).
+        DateTimeFormatter fmt = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm")
+            .optionalStart().appendPattern(":ss").optionalEnd()
+            .toFormatter();
         if (pickupTime != null && !pickupTime.isEmpty()) {
             booking.setPickupTime(LocalDateTime.parse(pickupTime, fmt));
         }
