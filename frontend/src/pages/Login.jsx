@@ -15,15 +15,11 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await apiPost('/auth/login', { email, password })
-      const text = await res.text()
-      if (text.includes('successful')) {
+      if (res.ok) {
+        const data = await res.json()
         localStorage.setItem('loggedIn', 'true')
-        // Try to parse JSON for userId/fullName if available
-        try {
-          const data = JSON.parse(text)
-          if (data.id) localStorage.setItem('userId', data.id)
-          if (data.fullName) localStorage.setItem('fullName', data.fullName)
-        } catch (_) {}
+        if (data.userId) localStorage.setItem('userId', data.userId)
+        if (data.fullName) localStorage.setItem('fullName', data.fullName)
         navigate('/')
       } else {
         setError('Invalid email or password. Please try again.')
