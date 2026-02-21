@@ -37,8 +37,8 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-4 text-sm">
           <Link to="/" className="hover:text-primary">Home</Link>
-          <a href="#vendors" className="hover:text-primary">Vendors</a>
-          <a href="#vehicles" className="hover:text-primary">Vehicles</a>
+          <button onClick={() => document.getElementById('vendors')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-primary">Vendors</button>
+          <button onClick={() => document.getElementById('vehicles')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-primary">Vehicles</button>
           <Link to="/admin" className="hover:text-primary">Admin</Link>
           <button
             onClick={() => setDark(d => !d)}
@@ -70,8 +70,8 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 flex flex-col gap-3 text-sm">
           <Link to="/" onClick={() => setMenuOpen(false)} className="hover:text-primary">Home</Link>
-          <a href="#vendors" onClick={() => setMenuOpen(false)} className="hover:text-primary">Vendors</a>
-          <a href="#vehicles" onClick={() => setMenuOpen(false)} className="hover:text-primary">Vehicles</a>
+          <button onClick={() => { setMenuOpen(false); document.getElementById('vendors')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-primary">Vendors</button>
+          <button onClick={() => { setMenuOpen(false); document.getElementById('vehicles')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-primary">Vehicles</button>
           <Link to="/admin" onClick={() => setMenuOpen(false)} className="hover:text-primary">Admin</Link>
           <button onClick={() => setDark(d => !d)} className="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 w-fit">
             {dark ? '☀️' : '🌙'}
