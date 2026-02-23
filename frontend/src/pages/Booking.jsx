@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { vehicles } from '../data/vehicles'
-import { apiPost, apiPut } from '../utils/api'
+import { vehicles as staticVehicles } from '../data/vehicles'
+import { apiPost, apiPut, apiGet } from '../utils/api'
 
 const GARAGES = [
   'Rajpur Road Garage',
@@ -30,7 +30,7 @@ export default function Booking() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const id = params.get('id')
-  const vehicle = vehicles.find(v => v.id === id)
+  const [vehicle, setVehicle] = useState(() => staticVehicles.find(v => String(v.id) === String(id)) || null)
 
   const [pickup, setPickup] = useState('')
   const [dropoff, setDropoff] = useState('')
@@ -39,6 +39,21 @@ export default function Booking() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(null)
+
+  useEffect(() => {
+    if (!vehicle && id) {
+      apiGet(`/vehicle/get/${id}`)
+        .then(res => { if (res.ok) return res.json() })
+        .then(data => {
+          if (data) setVehicle({
+            ...data,
+            vendor: data.vendor ? data.vendor.vendorName : 'Unknown Vendor',
+            location: data.vendor ? data.vendor.location : '',
+          })
+        })
+        .catch(() => {})
+    }
+  }, [id, vehicle])
 
   const { hours, price } = calcPrice(vehicle, pickup, dropoff)
   const halfAmount = Math.round(price / 2)

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { vehicles } from '../data/vehicles'
+import { vehicles as staticVehicles } from '../data/vehicles'
+import { apiGet } from '../utils/api'
 
 const vendors = [
   {
@@ -27,7 +28,27 @@ const vendors = [
 export default function Home() {
   const [filterType, setFilterType] = useState('all')
   const [filterVendor, setFilterVendor] = useState('all')
+  const [vehicles, setVehicles] = useState(staticVehicles)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    async function loadVehicles() {
+      try {
+        const res = await apiGet('/vehicle/all')
+        if (res.ok) {
+          const list = await res.json()
+          const normalized = list.map(v => ({
+            ...v,
+            vendor: v.vendor ? v.vendor.vendorName : 'Unknown Vendor',
+            location: v.vendor ? v.vendor.location : '',
+          }))
+          const normalizedIds = new Set(normalized.map(v => String(v.id)))
+          setVehicles([...normalized, ...staticVehicles.filter(sv => !normalizedIds.has(String(sv.id)))])
+        }
+      } catch (_) {}
+    }
+    loadVehicles()
+  }, [])
 
   const filtered = vehicles.filter(v => {
     const typeMatch = filterType === 'all' || v.type === filterType
