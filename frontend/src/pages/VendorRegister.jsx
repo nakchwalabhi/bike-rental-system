@@ -28,8 +28,12 @@ export default function VendorRegister() {
       if (res.ok) {
         navigate('/vendor-login')
       } else {
-        const text = await res.text()
-        setError(text || 'Registration failed. Try again.')
+        try {
+          const data = await res.json()
+          setError(data.error || data.message || 'Registration failed. Try again.')
+        } catch (_) {
+          setError('Registration failed. Try again.')
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.')

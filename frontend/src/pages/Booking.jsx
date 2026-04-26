@@ -80,12 +80,14 @@ export default function Booking() {
       })
 
       let bookingId = null
+      let bookingRef = null
       let serverHalfAmount = halfAmount
 
       if (bookingRes.ok) {
         try {
           const bookingData = await bookingRes.json()
           bookingId = bookingData.bookingId || bookingData.id
+          bookingRef = bookingData.bookingRef || null
           serverHalfAmount = bookingData.halfAmount || halfAmount
         } catch (_) {}
       }
@@ -120,14 +122,14 @@ export default function Booking() {
                   })
                 } catch (_) {}
               }
-              const ref = bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`
+              const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
               setSuccess({ ref, razorpayPaymentId: response.razorpay_payment_id })
               resolve()
             },
             modal: {
               ondismiss: function () {
                 // Show success anyway in test mode
-                const ref = bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`
+                const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
                 setSuccess({ ref, note: 'Payment popup closed. Booking saved.' })
                 resolve()
               }
@@ -141,7 +143,7 @@ export default function Booking() {
         })
       } else {
         // Razorpay not available - show confirmation anyway
-        const ref = bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`
+        const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
         setSuccess({ ref, note: 'Booking confirmed. Payment will be collected at pickup.' })
       }
     } catch (err) {

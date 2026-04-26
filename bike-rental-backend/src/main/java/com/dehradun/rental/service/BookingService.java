@@ -2,8 +2,10 @@ package com.dehradun.rental.service;
 
 import com.dehradun.rental.model.Booking;
 import com.dehradun.rental.model.User;
+import com.dehradun.rental.model.Vehicle;
 import com.dehradun.rental.repository.BookingRepository;
 import com.dehradun.rental.repository.UserRepository;
+import com.dehradun.rental.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +21,30 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
 
-    public Booking createBooking(Long userId, String vehicleName, String pickupTime,
+    public Booking createBooking(Long userId, String vehicleId, String pickupTime,
                                   String dropoffTime, String garage, String notes,
                                   Double totalAmount) {
         User user = userRepository.findById(userId).orElse(null);
 
+        // Resolve vehicle from DB when the ID is a numeric (API-added vehicle).
+        // Static vehicles have string IDs (e.g. "activa-6g-hwg") that don't exist in DB;
+        // for those the vehicle FK is left null.
+        Vehicle vehicle = null;
+        if (vehicleId != null) {
+            try {
+                Long vid = Long.parseLong(vehicleId);
+                vehicle = vehicleRepository.findById(vid).orElse(null);
+            } catch (NumberFormatException ignored) {
+                // Static vehicle ID – not stored in DB, leave vehicle null
+            }
+        }
+
         Booking booking = new Booking();
         booking.setBookingRef("BR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         booking.setUser(user);
+        booking.setVehicle(vehicle);
         booking.setGarage(garage);
         booking.setNotes(notes);
         booking.setTotalAmount(totalAmount);

@@ -24,8 +24,8 @@ export default function AdminDashboard() {
       const res = await apiGet(`/vendor/vehicle/all/${vendorId}`)
       if (res.ok) list = await res.json()
     } catch (_) {}
-    // Combine with static vehicles for demo
-    const combined = [...list, ...staticVehicles.filter(sv => !list.find(v => v.id === sv.id))]
+    // Combine with static vehicles that belong to this vendor (for demo data)
+    const combined = [...list, ...staticVehicles.filter(sv => sv.vendor === vendorName && !list.find(v => v.id === sv.id))]
     setVehicles(combined)
     setLoading(false)
   }
