@@ -49,7 +49,6 @@ export default function Navbar() {
           <Link to="/" className="hover:text-primary">Home</Link>
           <button onClick={() => scrollTo('vendors')} className="hover:text-primary">Vendors</button>
           <button onClick={() => scrollTo('vehicles')} className="hover:text-primary">Vehicles</button>
-          <Link to="/admin" className="hover:text-primary">Admin</Link>
           <button
             onClick={() => setDark(d => !d)}
             className="ml-2 text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600"
@@ -82,7 +81,6 @@ export default function Navbar() {
           <Link to="/" onClick={() => setMenuOpen(false)} className="hover:text-primary">Home</Link>
           <button onClick={() => { setMenuOpen(false); scrollTo('vendors') }} className="hover:text-primary text-left">Vendors</button>
           <button onClick={() => { setMenuOpen(false); scrollTo('vehicles') }} className="hover:text-primary text-left">Vehicles</button>
-          <Link to="/admin" onClick={() => setMenuOpen(false)} className="hover:text-primary">Admin</Link>
           <button onClick={() => setDark(d => !d)} className="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 w-fit">
             {dark ? '☀️' : '🌙'}
           </button>

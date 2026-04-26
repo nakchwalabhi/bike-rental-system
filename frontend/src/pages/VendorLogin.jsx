@@ -54,13 +54,13 @@ export default function VendorLogin() {
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Email</label>
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Username / Email</label>
             <input
-              type="email"
+              type="text"
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="vendor@example.com"
+              placeholder="admin or vendor@example.com"
               className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
