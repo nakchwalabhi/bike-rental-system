@@ -23,6 +23,16 @@ export default function Navbar() {
     navigate('/login')
   }
 
+  function scrollTo(id) {
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // Not on home page – navigate there first; the section will be at the top
+      navigate('/')
+    }
+  }
+
   return (
     <header className="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur sticky top-0 z-20">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -37,8 +47,8 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-4 text-sm">
           <Link to="/" className="hover:text-primary">Home</Link>
-          <a href="#vendors" className="hover:text-primary">Vendors</a>
-          <a href="#vehicles" className="hover:text-primary">Vehicles</a>
+          <button onClick={() => scrollTo('vendors')} className="hover:text-primary">Vendors</button>
+          <button onClick={() => scrollTo('vehicles')} className="hover:text-primary">Vehicles</button>
           <Link to="/admin" className="hover:text-primary">Admin</Link>
           <button
             onClick={() => setDark(d => !d)}
@@ -70,8 +80,8 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 flex flex-col gap-3 text-sm">
           <Link to="/" onClick={() => setMenuOpen(false)} className="hover:text-primary">Home</Link>
-          <a href="#vendors" onClick={() => setMenuOpen(false)} className="hover:text-primary">Vendors</a>
-          <a href="#vehicles" onClick={() => setMenuOpen(false)} className="hover:text-primary">Vehicles</a>
+          <button onClick={() => { setMenuOpen(false); scrollTo('vendors') }} className="hover:text-primary text-left">Vendors</button>
+          <button onClick={() => { setMenuOpen(false); scrollTo('vehicles') }} className="hover:text-primary text-left">Vehicles</button>
           <Link to="/admin" onClick={() => setMenuOpen(false)} className="hover:text-primary">Admin</Link>
           <button onClick={() => setDark(d => !d)} className="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 w-fit">
             {dark ? '☀️' : '🌙'}

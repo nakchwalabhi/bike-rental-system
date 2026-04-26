@@ -75,12 +75,18 @@ export default function Home() {
               Choose from trusted local garages, verify with your driving license, and ride across the valley with transparent pricing.
             </p>
             <div className="flex flex-wrap gap-3 text-xs">
-              <a href="#vehicles" className="px-4 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90">
+              <button
+                onClick={() => document.getElementById('vehicles')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-4 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90"
+              >
                 Browse Vehicles
-              </a>
-              <a href="#vendors" className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-primary">
+              </button>
+              <button
+                onClick={() => document.getElementById('vendors')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-primary"
+              >
                 View Garages
-              </a>
+              </button>
             </div>
           </div>
           <div className="relative">
