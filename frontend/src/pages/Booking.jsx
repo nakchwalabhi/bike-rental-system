@@ -94,11 +94,13 @@ export default function Booking() {
 
       // Step 2: Create Razorpay order
       let razorpayOrderId = null
+      let razorpayKeyId = null
       try {
-        const orderRes = await apiPost('/payment/create-order', { amount: serverHalfAmount })
+        const orderRes = await apiPost('/payment/create-order', { amount: serverHalfAmount, currency: 'INR', receipt: bookingRef || `booking-${Date.now()}` })
         if (orderRes.ok) {
           const orderData = await orderRes.json()
           razorpayOrderId = orderData.orderId || orderData.id
+          razorpayKeyId = orderData.keyId || null
         }
       } catch (_) {}
 
@@ -106,7 +108,7 @@ export default function Booking() {
       if (razorpayOrderId && window.Razorpay) {
         await new Promise((resolve) => {
           const rzp = new window.Razorpay({
-            key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_yourkeyhere',
+            key: razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY,
             amount: serverHalfAmount * 100,
             currency: 'INR',
             name: 'Dehradun Rides',
