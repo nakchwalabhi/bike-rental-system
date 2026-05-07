@@ -20,6 +20,7 @@ export default function Login() {
         localStorage.setItem('loggedIn', 'true')
         if (data.userId) localStorage.setItem('userId', data.userId)
         if (data.fullName) localStorage.setItem('fullName', data.fullName)
+        if (data.email) localStorage.setItem('email', data.email)
         navigate('/')
       } else {
         setError('Invalid email or password. Please try again.')

@@ -21,7 +21,8 @@ export default function Navbar() {
     localStorage.removeItem('loggedIn')
     localStorage.removeItem('userId')
     localStorage.removeItem('fullName')
-    navigate('/login')
+    localStorage.removeItem('email')
+    navigate('/')
   }
 
   function scrollTo(id) {
@@ -57,19 +58,37 @@ export default function Navbar() {
             {dark ? '☀️' : '🌙'}
           </button>
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-sm font-semibold shadow-sm hover:bg-primary/90 transition"
+                title="View profile"
+                aria-label="View profile"
+              >
+                {(localStorage.getItem('fullName') || 'U').charAt(0).toUpperCase()}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
-            <Link
-              to="/login"
-              className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition"
-            >
-              Login
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/register"
+                className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition"
+              >
+                Register
+              </Link>
+              <Link
+                to="/login"
+                className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition"
+              >
+                Login
+              </Link>
+            </div>
           )}
         </nav>
 
@@ -95,20 +114,39 @@ export default function Navbar() {
             {dark ? '☀️' : '🌙'}
           </button>
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition w-fit"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-sm font-semibold shadow-sm hover:bg-primary/90 transition"
+                aria-label="View profile"
+              >
+                {(localStorage.getItem('fullName') || 'U').charAt(0).toUpperCase()}
+              </Link>
+              <button
+                onClick={() => { setMenuOpen(false); handleLogout() }}
+                className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition w-fit"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
-            <Link
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-              className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition w-fit"
-            >
-              Login
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/register"
+                onClick={() => setMenuOpen(false)}
+                className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition w-fit"
+              >
+                Register
+              </Link>
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition w-fit"
+              >
+                Login
+              </Link>
+            </div>
           )}
         </div>
       )}

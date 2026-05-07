@@ -11,6 +11,47 @@ const GARAGES = [
   'Clock Tower Garage',
 ]
 
+
+function getErrorMessage(data, fallback) {
+  if (data && typeof data.error === 'string') return data.error
+  return fallback
+}
+
+function loadRazorpayCheckout() {
+  if (window.Razorpay) return Promise.resolve()
+
+  return new Promise((resolve, reject) => {
+    let script = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')
+    const fail = () => reject(new Error('Unable to load Razorpay checkout. Please check your internet connection.'))
+    const done = () => (window.Razorpay ? resolve() : fail())
+
+    const timeout = window.setTimeout(fail, 10000)
+    const cleanupAndResolve = () => {
+      window.clearTimeout(timeout)
+      done()
+    }
+    const cleanupAndReject = () => {
+      window.clearTimeout(timeout)
+      fail()
+    }
+
+    if (script && document.readyState === 'complete' && !window.Razorpay) {
+      script.remove()
+      script = null
+    }
+
+    if (!script) {
+      script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.async = true
+      document.body.appendChild(script)
+    }
+
+    script.addEventListener('load', cleanupAndResolve, { once: true })
+    script.addEventListener('error', cleanupAndReject, { once: true })
+  })
+}
+
 function calcPrice(vehicle, pickup, dropoff) {
   if (!vehicle || !pickup || !dropoff) return { hours: 0, price: 0 }
   const diffMs = new Date(dropoff) - new Date(pickup)
@@ -63,11 +104,14 @@ export default function Booking() {
     if (!vehicle) return
     if (!pickup || !dropoff) { setError('Please fill in pickup and dropoff times.'); return }
     if (hours <= 0) { setError('Dropoff must be after pickup.'); return }
+    if (halfAmount <= 0) { setError('Payable amount must be greater than zero.'); return }
     setError('')
     setLoading(true)
 
     try {
-      // Step 1: Create booking
+      await loadRazorpayCheckout()
+
+      // Step 1: Create booking in PENDING state.
       const userId = localStorage.getItem('userId') || 1
       const bookingRes = await apiPost('/booking/create', {
         vehicleId: vehicle.id,
@@ -78,78 +122,81 @@ export default function Booking() {
         notes,
         totalAmount: price,
       })
-
-      let bookingId = null
-      let bookingRef = null
-      let serverHalfAmount = halfAmount
-
-      if (bookingRes.ok) {
-        try {
-          const bookingData = await bookingRes.json()
-          bookingId = bookingData.bookingId || bookingData.id
-          bookingRef = bookingData.bookingRef || null
-          serverHalfAmount = bookingData.halfAmount || halfAmount
-        } catch (_) {}
+      const bookingData = await bookingRes.json().catch(() => null)
+      if (!bookingRes.ok) {
+        throw new Error(getErrorMessage(bookingData, 'Unable to create booking. Please try again.'))
       }
 
-      // Step 2: Create Razorpay order
-      let razorpayOrderId = null
-      let razorpayKeyId = null
-      try {
-        const orderRes = await apiPost('/payment/create-order', { amount: serverHalfAmount, currency: 'INR', receipt: bookingRef || `booking-${Date.now()}` })
-        if (orderRes.ok) {
-          const orderData = await orderRes.json()
-          razorpayOrderId = orderData.orderId || orderData.id
-          razorpayKeyId = orderData.keyId || null
-        }
-      } catch (_) {}
+      const bookingId = bookingData.bookingId || bookingData.id
+      const bookingRef = bookingData.bookingRef || null
+      const serverHalfAmount = Math.round(Number(bookingData.halfAmount || halfAmount))
+      if (!bookingId || serverHalfAmount <= 0) {
+        throw new Error('Booking was created, but payment details are invalid. Please contact support.')
+      }
 
-      // Step 3: Open Razorpay checkout
-      if (razorpayOrderId && window.Razorpay) {
-        await new Promise((resolve) => {
-          const rzp = new window.Razorpay({
-            key: razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY,
-            amount: serverHalfAmount * 100,
-            currency: 'INR',
-            name: 'Dehradun Rides',
-            description: `50% advance for ${vehicle.name}`,
-            order_id: razorpayOrderId,
-            handler: async function (response) {
-              // Step 4: Confirm payment
-              if (bookingId) {
-                try {
-                  await apiPut(`/booking/payment/${bookingId}`, {
-                    razorpayOrderId: response.razorpay_order_id,
-                    razorpayPaymentId: response.razorpay_payment_id,
-                  })
-                } catch (_) {}
+      // Step 2: Create Razorpay order for exactly 50% advance.
+      const orderRes = await apiPost('/payment/create-order', {
+        amount: serverHalfAmount,
+        currency: 'INR',
+        receipt: bookingRef || `booking-${bookingId}`,
+      })
+      const orderData = await orderRes.json().catch(() => null)
+      if (!orderRes.ok || !orderData?.configured || !(orderData.orderId || orderData.id)) {
+        throw new Error(getErrorMessage(orderData, 'Razorpay order could not be created. Please check Razorpay keys and try again.'))
+      }
+
+      const razorpayOrderId = orderData.orderId || orderData.id
+      const razorpayKeyId = orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY
+      if (!razorpayKeyId) {
+        throw new Error('Razorpay key is missing. Please configure the Razorpay key before accepting online payments.')
+      }
+
+      // Step 3: Open Razorpay checkout. Booking is confirmed only after payment succeeds.
+      await new Promise((resolve, reject) => {
+        const rzp = new window.Razorpay({
+          key: razorpayKeyId,
+          amount: orderData.amount || serverHalfAmount * 100,
+          currency: orderData.currency || 'INR',
+          name: 'Dehradun Rides',
+          description: `50% advance for ${vehicle.name}`,
+          order_id: razorpayOrderId,
+          handler: async function (response) {
+            try {
+              const confirmRes = await apiPut(`/booking/payment/${bookingId}`, {
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              })
+              const confirmData = await confirmRes.json().catch(() => null)
+              if (!confirmRes.ok) {
+                throw new Error(getErrorMessage(confirmData, 'Payment verification failed. Please contact support with your Razorpay Payment ID.'))
               }
-              const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
+              const ref = confirmData?.bookingRef || bookingRef || `BR-${bookingId}`
               setSuccess({ ref, razorpayPaymentId: response.razorpay_payment_id })
               resolve()
+            } catch (confirmationError) {
+              reject(confirmationError instanceof Error
+                ? confirmationError
+                : new Error('Payment was captured, but booking confirmation failed. Please contact support with your Razorpay Payment ID.'))
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              reject(new Error('Payment was cancelled. Your booking is still pending and is not confirmed until the 50% advance is paid.'))
             },
-            modal: {
-              ondismiss: function () {
-                // Show success anyway in test mode
-                const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
-                setSuccess({ ref, note: 'Payment popup closed. Booking saved.' })
-                resolve()
-              }
-            },
-            prefill: {
-              name: localStorage.getItem('fullName') || '',
-            },
-            theme: { color: '#1d4ed8' }
-          })
-          rzp.open()
+          },
+          prefill: {
+            name: localStorage.getItem('fullName') || '',
+          },
+          theme: { color: '#1d4ed8' },
         })
-      } else {
-        // Razorpay not available - show confirmation anyway
-        const ref = bookingRef || (bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`)
-        setSuccess({ ref, note: 'Booking confirmed. Payment will be collected at pickup.' })
-      }
+        rzp.on('payment.failed', function (response) {
+          reject(new Error(response?.error?.description || 'Razorpay payment failed. Please try again.'))
+        })
+        rzp.open()
+      })
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      setError(err.message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
