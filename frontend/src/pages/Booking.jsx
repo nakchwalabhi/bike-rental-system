@@ -88,7 +88,7 @@ export default function Booking() {
 
       const orderData = await orderRes.json()
       const razorpayOrderId = orderData.orderId || orderData.id
-      const razorpayKeyId = orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY
+      const razorpayKeyId = orderData.keyId
 
       // Step 3: Open Razorpay checkout
       if (!razorpayOrderId) {
@@ -133,8 +133,9 @@ export default function Booking() {
             },
             theme: { color: '#1d4ed8' }
           })
-          rzp.on('payment.failed', function () {
-            reject(new Error('Payment failed. Please try again.'))
+          rzp.on('payment.failed', function (response) {
+            const reason = response?.error?.description || response?.error?.reason || 'Payment failed. Please try again.'
+            reject(new Error(reason))
           })
           rzp.open()
         })

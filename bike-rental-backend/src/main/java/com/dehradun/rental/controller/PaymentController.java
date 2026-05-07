@@ -25,7 +25,7 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                .body(Map.of("error", e.getMessage()));
+                .body(Map.of("error", "Payment service temporarily unavailable"));
         }
     }
 }
