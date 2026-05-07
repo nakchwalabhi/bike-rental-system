@@ -41,4 +41,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUser(@PathVariable Long userId) {
+        try {
+            User user = authService.getUserById(userId);
+            return ResponseEntity.ok(Map.of(
+                "userId", user.getId(),
+                "fullName", user.getFullName(),
+                "email", user.getEmail()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
