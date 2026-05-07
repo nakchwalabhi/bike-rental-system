@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Booking from './pages/Booking'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminLogin from './pages/AdminLogin'
 import VendorLogin from './pages/VendorLogin'
 import VendorRegister from './pages/VendorRegister'
 
@@ -15,6 +16,11 @@ function PrivateRoute({ children }) {
 function VendorRoute({ children }) {
   const loggedIn = localStorage.getItem('vendorLoggedIn')
   return loggedIn === 'true' ? children : <Navigate to="/vendor-login" replace />
+}
+
+function AdminRoute({ children }) {
+  const loggedIn = localStorage.getItem('adminLoggedIn')
+  return loggedIn === 'true' ? children : <AdminLogin />
 }
 
 function AuthRoute({ children }) {
@@ -30,7 +36,8 @@ export default function App() {
         <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
         <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
         <Route path="/booking" element={<PrivateRoute><Booking /></PrivateRoute>} />
-        <Route path="/admin" element={<VendorRoute><AdminDashboard /></VendorRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/vendor-dashboard" element={<VendorRoute><AdminDashboard /></VendorRoute>} />
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/vendor-register" element={<VendorRegister />} />
       </Routes>

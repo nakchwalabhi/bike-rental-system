@@ -75,10 +75,12 @@ export default function AdminDashboard() {
   }
 
   function handleLogout() {
+    const isAdminSession = localStorage.getItem('adminLoggedIn') === 'true'
+    localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('vendorLoggedIn')
     localStorage.removeItem('vendorId')
     localStorage.removeItem('vendorName')
-    navigate('/vendor-login')
+    navigate(isAdminSession ? '/admin' : '/vendor-login')
   }
 
   return (
