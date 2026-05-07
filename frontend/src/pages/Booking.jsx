@@ -76,20 +76,34 @@ export default function Booking() {
       }
 
       // Step 2: Create Razorpay order
-      let razorpayOrderId = null
-      try {
-        const orderRes = await apiPost('/payment/create-order', { amount: serverHalfAmount })
-        if (orderRes.ok) {
-          const orderData = await orderRes.json()
-          razorpayOrderId = orderData.orderId || orderData.id
-        }
-      } catch (_) {}
+      const orderRes = await apiPost('/payment/create-order', { amount: serverHalfAmount })
+      if (!orderRes.ok) {
+        let backendError = 'Unable to create Razorpay order.'
+        try {
+          const errorData = await orderRes.json()
+          backendError = errorData.error || backendError
+        } catch (_) {}
+        throw new Error(backendError)
+      }
+
+      const orderData = await orderRes.json()
+      const razorpayOrderId = orderData.orderId || orderData.id
+      const razorpayKeyId = orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY
 
       // Step 3: Open Razorpay checkout
-      if (razorpayOrderId && window.Razorpay) {
-        await new Promise((resolve) => {
+      if (!razorpayOrderId) {
+        throw new Error('Razorpay order ID missing from backend response.')
+      }
+      if (!razorpayKeyId) {
+        throw new Error('Razorpay key is missing. Set backend or frontend key.')
+      }
+      if (!window.Razorpay) {
+        throw new Error('Razorpay checkout script failed to load.')
+      }
+
+      await new Promise((resolve, reject) => {
           const rzp = new window.Razorpay({
-            key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_yourkeyhere',
+            key: razorpayKeyId,
             amount: serverHalfAmount * 100,
             currency: 'INR',
             name: 'Dehradun Rides',
@@ -111,10 +125,7 @@ export default function Booking() {
             },
             modal: {
               ondismiss: function () {
-                // Show success anyway in test mode
-                const ref = bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`
-                setSuccess({ ref, note: 'Payment popup closed. Booking saved.' })
-                resolve()
+                reject(new Error('Payment was cancelled before completion.'))
               }
             },
             prefill: {
@@ -122,15 +133,13 @@ export default function Booking() {
             },
             theme: { color: '#1d4ed8' }
           })
+          rzp.on('payment.failed', function () {
+            reject(new Error('Payment failed. Please try again.'))
+          })
           rzp.open()
         })
-      } else {
-        // Razorpay not available - show confirmation anyway
-        const ref = bookingId ? `BR-${bookingId}` : `BR-${Math.floor(10000 + Math.random() * 90000)}`
-        setSuccess({ ref, note: 'Booking confirmed. Payment will be collected at pickup.' })
-      }
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      setError(err?.message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }

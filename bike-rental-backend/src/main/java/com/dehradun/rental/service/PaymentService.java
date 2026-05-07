@@ -22,6 +22,10 @@ public class PaymentService {
     private String keySecret;
 
     public Map<String, Object> createOrder(Double amount, String currency, String receipt) {
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than 0");
+        }
+
         Map<String, Object> response = new HashMap<>();
         try {
             RazorpayClient client = new RazorpayClient(keyId, keySecret);
@@ -36,11 +40,7 @@ public class PaymentService {
             response.put("keyId", keyId);
         } catch (RazorpayException e) {
             log.error("Razorpay order creation failed: {}", e.getMessage());
-            // For demo/test mode, return mock order
-            response.put("orderId", "order_demo_" + System.currentTimeMillis());
-            response.put("amount", (int)(amount * 100));
-            response.put("currency", "INR");
-            response.put("keyId", keyId);
+            throw new RuntimeException("Failed to create Razorpay order", e);
         }
         return response;
     }
