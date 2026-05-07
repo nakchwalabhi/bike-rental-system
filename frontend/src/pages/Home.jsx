@@ -25,11 +25,11 @@ const vendors = [
   },
 ]
 
-export default function Home() {
+export default function Home({ initialLoginPrompt = false }) {
   const [filterType, setFilterType] = useState('all')
   const [filterVendor, setFilterVendor] = useState('all')
   const [vehicles, setVehicles] = useState(staticVehicles)
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(initialLoginPrompt)
   const isLoggedIn = !!localStorage.getItem('loggedIn')
   const navigate = useNavigate()
 
