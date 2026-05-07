@@ -20,10 +20,8 @@ function getVehicleName(booking) {
 export default function Profile() {
   const navigate = useNavigate()
   const userId = localStorage.getItem('userId')
-  const [profile, setProfile] = useState({
-    fullName: localStorage.getItem('fullName') || 'Customer',
-    email: localStorage.getItem('email') || '',
-  })
+  const fullName = localStorage.getItem('fullName') || 'Customer'
+  const email = localStorage.getItem('email') || 'Email not available'
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -35,39 +33,12 @@ export default function Profile() {
       return
     }
 
-    async function loadProfileAndBookings() {
+    async function loadBookings() {
       try {
-        const [profileRes, bookingsRes] = await Promise.all([
-          apiGet(`/auth/user/${userId}`),
-          apiGet(`/booking/user/${userId}`),
-        ])
-
-        if (profileRes.ok) {
-          const userData = await profileRes.json()
-          setProfile({
-            fullName: userData.fullName || localStorage.getItem('fullName') || 'Customer',
-            email: userData.email || localStorage.getItem('email') || '',
-          })
-          if (userData.fullName) localStorage.setItem('fullName', userData.fullName)
-          if (userData.email) localStorage.setItem('email', userData.email)
-        }
-
-        if (!bookingsRes.ok) throw new Error('Unable to load booking history.')
-        const bookingData = await bookingsRes.json()
-        const bookingList = Array.isArray(bookingData) ? bookingData : []
-        setBookings(bookingList)
-
-        if (!profileRes.ok) {
-          const bookingUser = bookingList.find(booking => booking.user)?.user
-          if (bookingUser) {
-            setProfile({
-              fullName: bookingUser.fullName || localStorage.getItem('fullName') || 'Customer',
-              email: bookingUser.email || localStorage.getItem('email') || '',
-            })
-            if (bookingUser.fullName) localStorage.setItem('fullName', bookingUser.fullName)
-            if (bookingUser.email) localStorage.setItem('email', bookingUser.email)
-          }
-        }
+        const res = await apiGet(`/booking/user/${userId}`)
+        if (!res.ok) throw new Error('Unable to load booking history.')
+        const data = await res.json()
+        setBookings(Array.isArray(data) ? data : [])
       } catch (err) {
         setError(err.message || 'Unable to load booking history.')
       } finally {
@@ -75,7 +46,7 @@ export default function Profile() {
       }
     }
 
-    loadProfileAndBookings()
+    loadBookings()
   }, [userId])
 
   return (
@@ -100,10 +71,10 @@ export default function Profile() {
           <aside className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 h-fit">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-14 w-14 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">
-                {profile.fullName.charAt(0).toUpperCase()}
+                {fullName.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h2 className="font-semibold">{profile.fullName}</h2>
+                <h2 className="font-semibold">{fullName}</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">User ID: {userId || 'Not available'}</p>
               </div>
             </div>
@@ -111,11 +82,11 @@ export default function Profile() {
             <div className="space-y-3 text-sm">
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Full Name</p>
-                <p className="font-medium">{profile.fullName}</p>
+                <p className="font-medium">{fullName}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Email</p>
-                <p className="font-medium break-all">{profile.email || 'Email not available'}</p>
+                <p className="font-medium break-all">{email}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Total Bookings</p>
