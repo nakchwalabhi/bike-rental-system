@@ -95,7 +95,7 @@ export default function Booking() {
         throw new Error('Razorpay order ID missing from backend response.')
       }
       if (!razorpayKeyId) {
-        throw new Error('Razorpay key is missing. Set backend or frontend key.')
+        throw new Error('Razorpay key is missing in backend payment response. Check backend Razorpay config.')
       }
       if (!window.Razorpay) {
         throw new Error('Razorpay checkout script failed to load.')
