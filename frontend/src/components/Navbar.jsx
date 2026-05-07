@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 export default function Navbar() {
   const [dark, setDark] = useState(localStorage.getItem('theme') === 'dark')
   const [menuOpen, setMenuOpen] = useState(false)
+  const isLoggedIn = !!localStorage.getItem('loggedIn')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -55,12 +56,21 @@ export default function Navbar() {
           >
             {dark ? '☀️' : '🌙'}
           </button>
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition"
-          >
-            Logout
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition"
+            >
+              Login
+            </Link>
+          )}
         </nav>
 
         {/* Mobile hamburger */}
@@ -84,12 +94,22 @@ export default function Navbar() {
           <button onClick={() => setDark(d => !d)} className="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 w-fit">
             {dark ? '☀️' : '🌙'}
           </button>
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition w-fit"
-          >
-            Logout
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 rounded-lg border border-primary text-primary text-xs font-medium hover:bg-primary hover:text-white transition w-fit"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition w-fit"
+            >
+              Login
+            </Link>
+          )}
         </div>
       )}
     </header>
