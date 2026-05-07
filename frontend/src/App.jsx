@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState } from 'react'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -19,8 +20,8 @@ function VendorRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const loggedIn = localStorage.getItem('adminLoggedIn')
-  return loggedIn === 'true' ? children : <AdminLogin />
+  const [loggedIn, setLoggedIn] = useState(localStorage.getItem('adminLoggedIn') === 'true')
+  return loggedIn ? children : <AdminLogin onSuccess={() => setLoggedIn(true)} />
 }
 
 function AuthRoute({ children }) {
@@ -30,7 +31,7 @@ function AuthRoute({ children }) {
 
 export default function App() {
   return (
-    <HashRouter>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
         <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />

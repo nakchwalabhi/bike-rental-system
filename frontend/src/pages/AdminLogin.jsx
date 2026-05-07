@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { apiPost } from '../utils/api'
 
-export default function AdminLogin() {
+export default function AdminLogin({ onSuccess }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -30,7 +30,8 @@ export default function AdminLogin() {
       localStorage.setItem('vendorId', admin.id)
       localStorage.setItem('vendorName', admin.vendorName || 'Admin')
       localStorage.removeItem('vendorLoggedIn')
-      navigate('/admin')
+      onSuccess?.()
+      navigate('/admin', { replace: true })
     } catch (_) {
       setError('Network error. Please try again.')
     } finally {
