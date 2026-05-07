@@ -13,11 +13,6 @@ export default function AdminLogin() {
     e.preventDefault()
     setError('')
 
-    if (username !== 'admin' || password !== 'nakchwal14') {
-      setError('Invalid admin credentials.')
-      return
-    }
-
     setLoading(true)
     try {
       const res = await apiPost('/vendor/auth/login', { email: username, password })
