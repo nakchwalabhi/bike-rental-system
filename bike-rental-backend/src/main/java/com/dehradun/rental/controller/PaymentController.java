@@ -18,6 +18,7 @@ public class PaymentController {
     @PostMapping("/create-order")
     public ResponseEntity<Map<String, Object>> createOrder(@RequestBody PaymentOrderRequest req) {
         Map<String, Object> order = paymentService.createOrder(req.amount(), req.currency(), req.receipt());
-        return ResponseEntity.ok(order);
+        boolean configured = Boolean.TRUE.equals(order.get("configured"));
+        return configured ? ResponseEntity.ok(order) : ResponseEntity.badRequest().body(order);
     }
 }
