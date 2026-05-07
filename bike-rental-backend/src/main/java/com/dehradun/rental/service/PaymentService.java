@@ -23,6 +23,11 @@ public class PaymentService {
 
     public Map<String, Object> createOrder(Double amount, String currency, String receipt) {
         Map<String, Object> response = new HashMap<>();
+        if (keyId == null || keySecret == null || keyId.contains("placeholder") || keySecret.contains("placeholder")) {
+            response.put("configured", false);
+            response.put("error", "Razorpay is not configured");
+            return response;
+        }
         try {
             RazorpayClient client = new RazorpayClient(keyId, keySecret);
             JSONObject options = new JSONObject();
@@ -34,13 +39,11 @@ public class PaymentService {
             response.put("amount", order.get("amount"));
             response.put("currency", order.get("currency"));
             response.put("keyId", keyId);
+            response.put("configured", true);
         } catch (RazorpayException e) {
             log.error("Razorpay order creation failed: {}", e.getMessage());
-            // For demo/test mode, return mock order
-            response.put("orderId", "order_demo_" + System.currentTimeMillis());
-            response.put("amount", (int)(amount * 100));
-            response.put("currency", "INR");
-            response.put("keyId", keyId);
+            response.put("configured", false);
+            response.put("error", "Unable to create Razorpay order");
         }
         return response;
     }
