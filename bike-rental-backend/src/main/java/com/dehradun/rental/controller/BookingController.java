@@ -2,6 +2,7 @@ package com.dehradun.rental.controller;
 
 import com.dehradun.rental.model.Booking;
 import com.dehradun.rental.service.BookingService;
+import com.dehradun.rental.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final PaymentService paymentService;
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
@@ -45,10 +47,17 @@ public class BookingController {
         @RequestBody Map<String, String> body
     ) {
         try {
+            String razorpayOrderId = body.get("razorpayOrderId");
+            String razorpayPaymentId = body.get("razorpayPaymentId");
+            String razorpaySignature = body.get("razorpaySignature");
+            if (!paymentService.verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Razorpay payment verification failed"));
+            }
+
             Booking booking = bookingService.updatePaymentStatus(
                 bookingId,
-                body.get("razorpayOrderId"),
-                body.get("razorpayPaymentId")
+                razorpayOrderId,
+                razorpayPaymentId
             );
             return ResponseEntity.ok(Map.of(
                 "bookingRef", booking.getBookingRef(),
