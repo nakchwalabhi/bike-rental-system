@@ -209,8 +209,8 @@ export default function Home({ initialLoginPrompt = false }) {
 
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 mt-4">
         <div className="max-w-6xl mx-auto px-4 py-3 text-[11px] flex items-center justify-between text-slate-500 dark:text-slate-400">
-          <span>© 2025 Dehradun Rides. Demo project.</span>
-          <span>Built with Spring Boot, React & Tailwind.</span>
+          <span>© 2026 All Rights Reserved.</span>
+          
         </div>
       </footer>
 
